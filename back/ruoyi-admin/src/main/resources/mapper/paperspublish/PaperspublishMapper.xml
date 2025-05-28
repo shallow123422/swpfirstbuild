@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.paperspublish.mapper.PaperspublishMapper">
+
+    <resultMap type="Paperspublish" id="PaperspublishResult">
+        <result property="papersId" column="papers_id" />
+        <result property="parentId" column="parent_id" />
+        <result property="ancestors" column="ancestors" />
+        <result property="papersCategory" column="papers_category" />
+        <result property="papersName" column="papers_name" />
+        <result property="author" column="author" />
+        <result property="keywords" column="keywords" />
+        <result property="uploadTime" column="upload_time" />
+        <result property="journal" column="journal" />
+        <result property="fileName" column="file_name" />
+        <result property="fileRoad" column="file_road" />
+        <result property="deptId" column="dept_id" />
+        <result property="userId" column="user_id" />
+    </resultMap>
+
+    <sql id="selectPaperspublishVo">
+        SELECT
+            l.papers_id,
+            l.parent_id,
+            l.ancestors,
+            l.papers_category,
+            l.papers_name,
+            l.author,
+            l.keywords,
+            l.upload_time,
+            l.journal,
+            l.file_name,
+            l.file_road,
+            l.dept_id,
+            l.user_id
+    </sql>
+
+    <select id="selectPaperspublishList" parameterType="Paperspublish" resultMap="PaperspublishResult">
+        <include refid="selectPaperspublishVo" />
+        FROM papers l
+        LEFT JOIN sys_user u ON l.user_id = u.user_id
+        <where>
+            <if test="papersCategory != null and papersCategory != ''">AND l.papers_category = #{papersCategory}</if>
+            <if test="papersName != null and papersName != ''">AND l.papers_name LIKE concat('%', #{papersName}, '%')</if>
+            <if test="author != null and author != ''">AND l.author LIKE concat('%', #{author}, '%')</if>
+            <if test="keywords != null and keywords != ''">AND l.keywords LIKE concat('%', #{keywords}, '%')</if>
+            <if test="uploadTime != null">AND l.upload_time = #{uploadTime}</if>
+            <if test="journal != null and journal != ''">AND l.journal LIKE concat('%', #{journal}, '%')</if>
+            ${params.dataScope}
+        </where>
+    </select>
+
+    <select id="selectPaperspublishByPapersId" parameterType="Long" resultMap="PaperspublishResult">
+        <include refid="selectPaperspublishVo" />
+        FROM papers l
+        WHERE l.papers_id = #{papersId}
+    </select>
+
+    <insert id="insertPaperspublish" parameterType="Paperspublish" useGeneratedKeys="true" keyProperty="papersId">
+        INSERT INTO papers
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">parent_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="papersCategory != null">papers_category,</if>
+            <if test="papersName != null and papersName != ''">papers_name,</if>
+            <if test="author != null and author != ''">author,</if>
+            <if test="keywords != null and keywords != ''">keywords,</if>
+            <if test="uploadTime != null">upload_time,</if>
+            <if test="journal != null and journal != ''">journal,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="fileRoad != null">file_road,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="userId != null">user_id,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">#{parentId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="papersCategory != null">#{papersCategory},</if>
+            <if test="papersName != null and papersName != ''">#{papersName},</if>
+            <if test="author != null and author != ''">#{author},</if>
+            <if test="keywords != null and keywords != ''">#{keywords},</if>
+            <if test="uploadTime != null">#{uploadTime},</if>
+            <if test="journal != null and journal != ''">#{journal},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="fileRoad != null">#{fileRoad},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="userId != null">#{userId},</if>
+        </trim>
+    </insert>
+
+    <update id="updatePaperspublish" parameterType="Paperspublish">
+        UPDATE papers
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="papersCategory != null">papers_category = #{papersCategory},</if>
+            <if test="papersName != null and papersName != ''">papers_name = #{papersName},</if>
+            <if test="author != null and author != ''">author = #{author},</if>
+            <if test="keywords != null and keywords != ''">keywords = #{keywords},</if>
+            <if test="uploadTime != null">upload_time = #{uploadTime},</if>
+            <if test="journal != null and journal != ''">journal = #{journal},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="fileRoad != null">file_road = #{fileRoad},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+        </trim>
+        WHERE papers_id = #{papersId}
+    </update>
+
+    <delete id="deletePaperspublishByPapersId" parameterType="Long">
+        DELETE FROM papers WHERE papers_id = #{papersId}
+    </delete>
+
+    <delete id="deletePaperspublishByPapersIds" parameterType="String">
+        DELETE FROM papers WHERE papers_id IN
+        <foreach item="papersId" collection="array" open="(" separator="," close=")">
+            #{papersId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.literatures.mapper.LiteraturesMapper">
+
+    <resultMap type="Literatures" id="LiteraturesResult">
+        <result property="literaturesId" column="literatures_id" />
+        <result property="parentId" column="parent_id" />
+        <result property="ancestors" column="ancestors" />
+        <result property="literaturesCategory" column="literatures_category" />
+        <result property="literaturesName" column="literatures_name" />
+        <result property="author" column="author" />
+        <result property="keywords" column="keywords" />
+        <result property="uploadTime" column="upload_time" />
+        <result property="journal" column="journal" />
+        <result property="fileName" column="file_name" />
+        <result property="fileRoad" column="file_road" />
+        <result property="deptId" column="dept_id" />
+        <result property="userId" column="user_id" />
+    </resultMap>
+
+    <sql id="selectLiteraturesVo">
+        select l.literatures_id, l.parent_id, l.ancestors, l.literatures_category, l.literatures_name, l.author, l.keywords, l.upload_time, l.journal, l.file_name, l.file_road, l.dept_id, l.user_id
+    </sql>
+
+    <select id="selectLiteraturesList" parameterType="Literatures" resultMap="LiteraturesResult">
+        <include refid="selectLiteraturesVo"/>
+        FROM literatures l
+        LEFT JOIN sys_user u ON l.user_id = u.user_id
+        <where>
+            <if test="literaturesCategory != null and literaturesCategory != ''"> and literatures_category = #{literaturesCategory}</if>
+            <if test="literaturesName != null and literaturesName != ''"> and literatures_name like concat('%', #{literaturesName}, '%')</if>
+            <if test="author != null and author != ''"> and author like concat('%', #{author}, '%')</if>
+            <if test="keywords != null and keywords != ''"> and keywords like concat('%', #{keywords}, '%')</if>
+            <if test="uploadTime != null"> and upload_time = #{uploadTime}</if>
+            <if test="journal != null and journal != ''"> and journal like concat('%', #{journal}, '%')</if>
+            ${params.dataScope}
+        </where>
+    </select>
+
+    <!-- ✅ 修复后的 SQL，添加了 FROM literatures l -->
+    <select id="selectLiteraturesByLiteraturesId" parameterType="Long" resultMap="LiteraturesResult">
+        <include refid="selectLiteraturesVo"/>
+        FROM literatures l
+        where l.literatures_id = #{literaturesId}
+    </select>
+
+    <insert id="insertLiteratures" parameterType="Literatures" useGeneratedKeys="true" keyProperty="literaturesId">
+        insert into literatures
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">parent_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="literaturesCategory != null and literaturesCategory != ''">literatures_category,</if>
+            <if test="literaturesName != null and literaturesName != ''">literatures_name,</if>
+            <if test="author != null and author != ''">author,</if>
+            <if test="keywords != null and keywords != ''">keywords,</if>
+            <if test="uploadTime != null">upload_time,</if>
+            <if test="journal != null and journal != ''">journal,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="fileRoad != null">file_road,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="userId != null">user_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">#{parentId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="literaturesCategory != null and literaturesCategory != ''">#{literaturesCategory},</if>
+            <if test="literaturesName != null and literaturesName != ''">#{literaturesName},</if>
+            <if test="author != null and author != ''">#{author},</if>
+            <if test="keywords != null and keywords != ''">#{keywords},</if>
+            <if test="uploadTime != null">#{uploadTime},</if>
+            <if test="journal != null and journal != ''">#{journal},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="fileRoad != null">#{fileRoad},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="userId != null">#{userId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateLiteratures" parameterType="Literatures">
+        update literatures
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="literaturesCategory != null and literaturesCategory != ''">literatures_category = #{literaturesCategory},</if>
+            <if test="literaturesName != null and literaturesName != ''">literatures_name = #{literaturesName},</if>
+            <if test="author != null and author != ''">author = #{author},</if>
+            <if test="keywords != null and keywords != ''">keywords = #{keywords},</if>
+            <if test="uploadTime != null">upload_time = #{uploadTime},</if>
+            <if test="journal != null and journal != ''">journal = #{journal},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="fileRoad != null">file_road = #{fileRoad},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+        </trim>
+        where literatures_id = #{literaturesId}
+    </update>
+
+    <delete id="deleteLiteraturesByLiteraturesId" parameterType="Long">
+        delete from literatures where literatures_id = #{literaturesId}
+    </delete>
+
+    <delete id="deleteLiteraturesByLiteraturesIds" parameterType="String">
+        delete from literatures where literatures_id in
+        <foreach item="literaturesId" collection="array" open="(" separator="," close=")">
+            #{literaturesId}
+        </foreach>
+    </delete>
+
+    <select id="selectLiteraturesWithChildren" parameterType="Literatures" resultMap="LiteraturesResult">
+        WITH RECURSIVE temp AS (
+        -- 初始查询：查找匹配类别的记录
+        <include refid="selectLiteraturesVo"/>
+        FROM literatures l
+        LEFT JOIN sys_user u ON l.user_id = u.user_id
+        <where>
+            <if test="literaturesCategory != null and literaturesCategory != ''">
+                literatures_category = #{literaturesCategory}
+            </if>
+            <if test="params != null and params.dataScope != null">
+                ${params.dataScope}
+            </if>
+        </where>
+
+        UNION ALL
+
+        -- 递归查询：查找所有子节点
+        <include refid="selectLiteraturesVo"/>
+        FROM literatures l
+        LEFT JOIN sys_user u ON l.user_id = u.user_id
+        INNER JOIN temp t ON l.parent_id = t.literatures_id
+        <where>
+            <if test="params != null and params.dataScope != null">
+                ${params.dataScope}
+            </if>
+        </where>
+        )
+        SELECT DISTINCT t.* FROM temp t
+    </select>
+</mapper>
