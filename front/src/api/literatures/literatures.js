@@ -42,3 +42,13 @@ export function delLiteratures(literaturesId) {
     method: 'delete'
   })
 }
+
+// 导出论文查询
+export function exportLiteratures(query) {
+  return request({
+    url: '/literatures/literatures/export',
+    method: 'get',
+    responseType: 'blob',
+    params: query
+  })
+}

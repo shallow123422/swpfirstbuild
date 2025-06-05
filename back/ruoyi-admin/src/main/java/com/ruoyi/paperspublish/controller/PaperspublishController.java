@@ -3,6 +3,8 @@ package com.ruoyi.paperspublish.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.papersfound.domain.Papersfound;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -43,10 +45,11 @@ public class PaperspublishController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('paperspublish:paperspublish:export')")
     @Log(title = "我的论文", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
+    @GetMapping("/export")
     public void export(HttpServletResponse response, Paperspublish paperspublish)
     {
-        List<Paperspublish> list = paperspublishService.selectPaperspublishList(paperspublish);
+        List<Paperspublish> list;
+        list = paperspublishService.selectPaperspublishList(paperspublish);
         // ✅ 只保留 uploadTime 不为 null 的记录
         list = list.stream()
                 .filter(item -> item.getUploadTime() != null)

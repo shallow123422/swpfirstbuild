@@ -42,3 +42,13 @@ export function delPapers(papersId) {
     method: 'delete'
   })
 }
+
+// 导出论文查询
+export function exportPapers(query) {
+  return request({
+    url: '/papers/papers/export',
+    method: 'get',
+    responseType: 'blob',
+    params: query
+  })
+}

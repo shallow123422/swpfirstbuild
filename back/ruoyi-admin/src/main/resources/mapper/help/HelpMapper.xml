@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.help.mapper.HelpMapper">
+    
+    <resultMap type="Help" id="HelpResult">
+        <result property="papersId"    column="papers_id"    />
+        <result property="parentId"    column="parent_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="papersCategory"    column="papers_category"    />
+        <result property="papersName"    column="papers_name"    />
+        <result property="author"    column="author"    />
+        <result property="keywords"    column="keywords"    />
+        <result property="uploadTime"    column="upload_time"    />
+        <result property="journal"    column="journal"    />
+        <result property="fileName"    column="file_name"    />
+        <result property="fileRoad"    column="file_road"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="userId"    column="user_id"    />
+    </resultMap>
+
+    <sql id="selectHelpVo">
+        select papers_id, parent_id, ancestors, papers_category, papers_name, author, keywords, upload_time, journal, file_name, file_road, dept_id, user_id from papers
+    </sql>
+
+    <select id="selectHelpList" parameterType="Help" resultMap="HelpResult">
+        <include refid="selectHelpVo"/>
+        <where>  
+            <if test="author != null  and author != ''"> and author like concat('%', #{author}, '%')</if>
+            <if test="journal != null  and journal != ''"> and journal like concat('%', #{journal}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectHelpByPapersId" parameterType="Long" resultMap="HelpResult">
+        <include refid="selectHelpVo"/>
+        where papers_id = #{papersId}
+    </select>
+
+    <insert id="insertHelp" parameterType="Help" useGeneratedKeys="true" keyProperty="papersId">
+        insert into papers
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">parent_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="papersCategory != null">papers_category,</if>
+            <if test="papersName != null">papers_name,</if>
+            <if test="author != null">author,</if>
+            <if test="keywords != null">keywords,</if>
+            <if test="uploadTime != null">upload_time,</if>
+            <if test="journal != null">journal,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="fileRoad != null">file_road,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="userId != null">user_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">#{parentId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="papersCategory != null">#{papersCategory},</if>
+            <if test="papersName != null">#{papersName},</if>
+            <if test="author != null">#{author},</if>
+            <if test="keywords != null">#{keywords},</if>
+            <if test="uploadTime != null">#{uploadTime},</if>
+            <if test="journal != null">#{journal},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="fileRoad != null">#{fileRoad},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="userId != null">#{userId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateHelp" parameterType="Help">
+        update papers
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="papersCategory != null">papers_category = #{papersCategory},</if>
+            <if test="papersName != null">papers_name = #{papersName},</if>
+            <if test="author != null">author = #{author},</if>
+            <if test="keywords != null">keywords = #{keywords},</if>
+            <if test="uploadTime != null">upload_time = #{uploadTime},</if>
+            <if test="journal != null">journal = #{journal},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="fileRoad != null">file_road = #{fileRoad},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+        </trim>
+        where papers_id = #{papersId}
+    </update>
+
+    <delete id="deleteHelpByPapersId" parameterType="Long">
+        delete from papers where papers_id = #{papersId}
+    </delete>
+
+    <delete id="deleteHelpByPapersIds" parameterType="String">
+        delete from papers where papers_id in 
+        <foreach item="papersId" collection="array" open="(" separator="," close=")">
+            #{papersId}
+        </foreach>
+    </delete>
+</mapper>

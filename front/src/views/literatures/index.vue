@@ -179,7 +179,7 @@
 </template>
 
 <script setup name="Literatures">
-import { listLiteratures, getLiteratures, delLiteratures, addLiteratures, updateLiteratures } from "@/api/literatures/literatures"
+import { listLiteratures, getLiteratures, delLiteratures, addLiteratures, updateLiteratures,exportLiteratures } from "@/api/literatures/literatures"
 
 const { proxy } = getCurrentInstance()
 
@@ -346,14 +346,36 @@ function handleDelete(row) {
   }).catch(() => {})
 }
 
+/** 导出按钮操作 */
 function handleExport() {
-  proxy.download(
-    '/literatures/literatures/export',
-    {
-      ...queryParams
-    },
-    `参考文献列表_${new Date().toISOString().slice(0, 10)}.xlsx`
-  )
+  proxy.$modal.confirm('是否确认导出数据项?').then(() => {
+    proxy.$modal.loading("正在导出数据，请稍候...");
+    // 传递当前的查询参数
+    exportLiteratures(queryParams.value).then(response => {
+      if (response.type === 'application/json') {
+        // 如果返回的是json，说明可能是错误信息
+        const reader = new FileReader();
+        reader.onload = e => {
+          const error = JSON.parse(e.target.result);
+          proxy.$modal.msgError(error.msg || '导出失败');
+        };
+        reader.readAsText(response);
+      } else {
+        // 正常的excel文件下载
+        const blob = new Blob([response], { type: 'application/vnd.ms-excel' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = '参考文献数据.xlsx';
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+      }
+      proxy.$modal.closeLoading();
+    }).catch((error) => {
+      console.error('Export error:', error);
+      proxy.$modal.msgError(error.message || '导出失败，请检查网络或联系管理员');
+      proxy.$modal.closeLoading();
+    });
+  });
 }
 
 getList()

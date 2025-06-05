@@ -3,6 +3,8 @@ package com.ruoyi.papers.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.papersfound.domain.Papersfound;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,10 +59,17 @@ public class PapersController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('papers:papers:export')")
     @Log(title = "论文管理", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
+    @GetMapping("/export")
     public void export(HttpServletResponse response, Papers papers)
     {
-        List<Papers> list = papersService.selectPapersList(papers);
+        List<Papers> list;
+        if (papers.getPapersCategory() != null && !papers.getPapersCategory().isEmpty()) {
+            // 如果指定了类别，导出该类别及其子节点的数据
+            list = papersService.selectPapersWithChildren(papers);
+        } else {
+            // 否则导出查询条件过滤后的数据
+            list = papersService.selectPapersList(papers);
+        }
         // ✅ 只保留 uploadTime 不为 null 的记录
         list = list.stream()
                 .filter(item -> item.getUploadTime() != null)

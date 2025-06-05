@@ -8,11 +8,17 @@
         <outputRelativeToContentRoot value="true" />
         <module name="ruoyi-common" />
         <module name="ruoyi-framework" />
-        <module name="ruoyi-generator" />
         <module name="ruoyi-system" />
-        <module name="ruoyi-quartz" />
         <module name="ruoyi-admin" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="pms-admin" target="1.8" />
+      <module name="pms-common" target="1.8" />
+      <module name="pms-framework" target="1.8" />
+      <module name="pms-system" target="1.8" />
+      <module name="ruoyi-generator" target="1.8" />
+      <module name="ruoyi-quartz" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

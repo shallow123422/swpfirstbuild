@@ -57,14 +57,23 @@ public class PapersfoundController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('papersfound:papersfound:export')")
     @Log(title = "论文查询", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
+    @GetMapping("/export")  // 改为GetMapping
     public void export(HttpServletResponse response, Papersfound papersfound)
     {
-        List<Papersfound> list = papersfoundService.selectPapersfoundList(papersfound);
-        // ✅ 只保留 uploadTime 不为 null 的记录
+        List<Papersfound> list;
+        if (papersfound.getPapersCategory() != null && !papersfound.getPapersCategory().isEmpty()) {
+            // 如果指定了类别，导出该类别及其子节点的数据
+            list = papersfoundService.selectPapersfoundWithChildren(papersfound);
+        } else {
+            // 否则导出查询条件过滤后的数据
+            list = papersfoundService.selectPapersfoundList(papersfound);
+        }
+
+        // 保留原有的上传时间过滤逻辑
         list = list.stream()
                 .filter(item -> item.getUploadTime() != null)
                 .collect(Collectors.toList());
+
         ExcelUtil<Papersfound> util = new ExcelUtil<Papersfound>(Papersfound.class);
         util.exportExcel(response, list, "论文查询数据");
     }

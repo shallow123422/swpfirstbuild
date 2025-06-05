@@ -3,6 +3,8 @@ package com.ruoyi.literatures.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.papersfound.domain.Papersfound;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,10 +64,17 @@ public class LiteraturesController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('literatures:literatures:export')")
     @Log(title = "参考文献", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
+    @GetMapping("/export")
     public void export(HttpServletResponse response, Literatures literatures)
     {
-        List<Literatures> list = literaturesService.selectLiteraturesList(literatures);
+        List<Literatures> list;
+        if (literatures.getLiteraturesCategory() != null && !literatures.getLiteraturesCategory().isEmpty()) {
+            // 如果指定了类别，导出该类别及其子节点的数据
+            list = literaturesService.selectLiteraturesWithChildren(literatures);
+        } else {
+            // 否则导出查询条件过滤后的数据
+            list = literaturesService.selectLiteraturesList(literatures);
+        }
         // ✅ 只保留 uploadTime 不为 null 的记录
         list = list.stream()
                 .filter(item -> item.getUploadTime() != null)
